@@ -1,17 +1,18 @@
-# Use an official OpenJDK 17 runtime with Maven pre-installed
-FROM maven:3.9.5-eclipse-temurin-17-alpine
+# Use an official Temurin JDK 17 base image that natively supports ARM64 (Apple Silicon)
+FROM eclipse-temurin:17-jdk-alpine
 
-# Set the working directory inside the container
+# Install Maven via apk (lightweight)
+RUN apk add --no-cache maven
+
+# Set working directory
 WORKDIR /app
 
-# Copy the pom.xml first to leverage Docker layer caching for dependencies
+# Copy pom.xml and cache dependencies
 COPY pom.xml .
-
-# Download dependencies offline to speed up subsequent builds
 RUN mvn dependency:go-offline -B
 
-# Copy the rest of your application source code
+# Copy project source code
 COPY src ./src
 
-# Default command to run your test suite when the container starts
+# Command to execute tests
 CMD ["mvn", "test"]
