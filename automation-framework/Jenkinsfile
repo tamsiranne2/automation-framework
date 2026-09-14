@@ -1,8 +1,12 @@
 pipeline {
     agent any
 
+    environment {
+        // Adds common macOS Maven installation paths to PATH
+        PATH = "/opt/homebrew/bin:/usr/local/bin:${env.PATH}"
+    }
+
     stages {
-        // Option A: Let Jenkins handle checkout automatically (Stage can be omitted or kept simple)
         stage('Checkout') {
             steps {
                 echo 'Repository checked out automatically by Jenkins.'
