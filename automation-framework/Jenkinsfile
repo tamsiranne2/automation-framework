@@ -13,13 +13,14 @@ pipeline {
             }
         }
 
-        stage('Build & Test') {
-            steps {
-                dir('automation-framework') {
-                    sh 'mvn clean test'
-                }
-            }
+       stage('Build & Test') {
+    steps {
+        dir('automation-framework') {
+            // Pass local repository location so it stays cached on the host
+            sh 'mvn clean test -Dmaven.repo.local=.m2/repository'
         }
+    }
+}
 
         stage('Containerized Execution') {
             steps {
