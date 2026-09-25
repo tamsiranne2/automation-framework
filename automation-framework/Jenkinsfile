@@ -1,0 +1,55 @@
+pipeline {
+    agent any
+
+    environment {
+        PATH = "/opt/homebrew/bin:/usr/local/bin:${env.PATH}"
+        DOCKER_CUSTOM_OPTION_API_VERSION = '1.44'
+        DOCKER_HOST = 'unix:///Users/tamsiranne/.colima/default/docker.sock'
+        TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE = '/Users/tamsiranne/.colima/default/docker.sock'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Repository checked out automatically by Jenkins.'
+            }
+        }
+
+        stage('Build & Test') {
+            steps {
+                dir('automation-framework') {
+                    sh 'mvn clean test -Dmaven.repo.local=.m2/repository'
+                }
+            }
+        }
+
+        stage('Build, Test Container & Push') {
+            steps {
+                script {
+                    dir('automation-framework') {
+                        withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_PAT', usernameVariable: 'DOCKER_USER')]) {
+                            sh 'echo $DOCKER_PAT | docker login -u $DOCKER_USER --password-stdin'
+                            
+                            def customImage = docker.build("tamsiranne2/automation-framework:${env.BUILD_NUMBER}")
+                            
+                            // Testlauf des gebauten Images
+                            sh "docker run --rm tamsiranne2/automation-framework:${env.BUILD_NUMBER}"
+                            
+                            // Push zu Docker Hub
+                            customImage.push()
+                            customImage.push('latest')
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            dir('automation-framework') {
+                junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+            }
+        }
+    }
+}
