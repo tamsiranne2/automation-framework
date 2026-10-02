@@ -32,10 +32,8 @@ pipeline {
                             
                             def customImage = docker.build("tamsiranne2/automation-framework:${env.BUILD_NUMBER}")
                             
-                            // Testlauf des gebauten Images
                             sh "docker run --rm tamsiranne2/automation-framework:${env.BUILD_NUMBER}"
                             
-                            // Push zu Docker Hub
                             customImage.push()
                             customImage.push('latest')
                         }
