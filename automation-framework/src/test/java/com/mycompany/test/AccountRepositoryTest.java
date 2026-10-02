@@ -17,6 +17,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
 class AccountRepositoryTest {
+	
+	
+
+	    static {
+	        System.setProperty("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", "/Users/tamsiranne/.colima/default/docker.sock");
+	        System.setProperty("DOCKER_CUSTOM_OPTION_API_VERSION", "1.44");
+	    }
+
+	    // Deinen bestehenden Tests (save, findById, etc.)...
+
 
     @Container
     private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
@@ -55,4 +65,6 @@ class AccountRepositoryTest {
             assertEquals(250.0, rs.getDouble("balance"));
         }
     }
+    
+    
 }
